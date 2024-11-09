@@ -87,8 +87,53 @@ const createCourse = async (req, res) => {
   }
 };
 
+const updateCourse = async (req,res) => {
+
+  const { title, description, price, imageurl,courseid } = req.body;
+
+  const adminId= req.admin.id;
+  console.log(adminId);
+  console.log(courseid);
+  
+  
+
+  try {
+    
+    const updatedCourse = await Course.updateOne({
+      _id:courseid,
+      creatorId:adminId
+    },{
+      title,
+      description,
+      price,
+      imageurl
+    })
+
+    res.json({
+      message:"done updating",
+      courseid
+    })
+    
+
+  } catch (error) {
+    if(error.path == "_id"){
+      res.status(400).json({
+        message:"No Courses with the given ID is created by you.",
+        status:400
+      })
+    }else{
+      res.json({
+        message:"Server error",
+        error
+      })
+    }
+  }
+
+}
+
 module.exports = {
   adminSignUp,
   adminSignIn,
   createCourse,
+  updateCourse
 };

@@ -1,4 +1,4 @@
-const User = require("../models/user.model");
+const {User} = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -23,7 +23,11 @@ const userSignUp = async (req, res) => {
       message: "user unable to signed up. ❌",
       error: error.message,
     });
+    console.log(error);
   }
+
+  
+  
 };
 
 const userSignIn = async (req, res) => {
