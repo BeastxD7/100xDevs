@@ -5,10 +5,9 @@ const wss = new ws_1.WebSocketServer({ port: 8080 });
 const allSockets = [];
 wss.on("connection", (socket) => {
     allSockets.push(socket);
-    socket.send("hi there!");
-    socket.on("message", (event) => {
+    socket.on("message", (message) => {
         allSockets.forEach((socket) => {
-            socket.send(event.toString());
+            socket.send("message: " + message);
         });
     });
 });
