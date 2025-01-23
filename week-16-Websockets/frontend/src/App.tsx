@@ -14,6 +14,10 @@ const App = () => {
     setSocket(ws)
   }, []);
 
+  // useEffect(() => {
+  //   localStorage.setItem("roomId" , "")
+  // })
+
   const joinBtn = () => {
     if(inputRef.current){
       roomId = inputRef.current.value;
@@ -24,6 +28,9 @@ const App = () => {
       if(roomId?.length == 0) {
         alert("Enter RoomId to Join!");
         return;
+      }
+      if (roomId) {
+        localStorage.setItem("roomId", roomId);
       }
       socket.send(`{"type":"join", "payload": {"roomId":"${roomId}"}}`)
     }
