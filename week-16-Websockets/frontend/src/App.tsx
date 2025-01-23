@@ -21,6 +21,10 @@ const App = () => {
       
     }
     if(socket) {
+      if(roomId?.length == 0) {
+        alert("Enter RoomId to Join!");
+        return;
+      }
       socket.send(`{"type":"join", "payload": {"roomId":"${roomId}"}}`)
     }
   };

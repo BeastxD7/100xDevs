@@ -9,8 +9,13 @@ wss.on("connection", (socket) => {
             const parsedmessage = JSON.parse(message.toString());
             console.log(parsedmessage);
             if (parsedmessage.type == "join") {
+                let roomId = parsedmessage.payload.roomId;
+                if (roomId.length == 0) {
+                    socket.send("Enter Room ID to Join!");
+                    return;
+                }
                 allSockets.push({
-                    roomId: parsedmessage.payload.roomId,
+                    roomId,
                     socket,
                 });
                 socket.send("room joined: " + parsedmessage.payload.roomId);
