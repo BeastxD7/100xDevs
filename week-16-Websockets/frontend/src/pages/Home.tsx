@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Navigate } from "react-router";
+import { SocketContext, SocketProvider } from "../Contexts/SocketProvider";
 
 const Home = () => {
+  const socketContext = useContext(SocketContext);
   let navigate = useNavigate();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -21,30 +22,33 @@ const Home = () => {
 
   const joinBtn = () => {
     if (inputRef.current) {
-      roomId = inputRef.current.value;
-      console.log(inputRef.current.value);
-    }
-    if (socket) {
-      if (roomId?.length == 0) {
-        alert("Enter RoomId to Join!");
+      const roomId = inputRef.current.value.trim(); // Get the room ID
+      if (!roomId) {
+        alert("Enter Room ID to Join!");
         return;
       }
-      if (roomId) {
-        localStorage.setItem("roomId", roomId);
+
+      // Save roomId to localStorage
+      localStorage.setItem("roomId", roomId);
+
+      // Use the context to send a "join" message
+      if (socketContext?.socket) {
+        socketContext.socket.send(
+          JSON.stringify({ type: "join", payload: { roomId } })
+        );
+        navigate("/chat");
+      } else {
+        alert("WebSocket connection is not established!");
       }
-      socket.send(`{"type":"join", "payload": {"roomId":"${roomId}"}}`);
-      navigate("/chat");
     }
   };
 
   return (
     <div className="w-screen h-screen bg-slate-900 flex justify-center items-center flex-col">
-      <h1
-        className="
-  text-white text-xl text-center py-4 font-semibold">
+      <h1 className="text-white text-xl text-center py-4 font-semibold">
         Chat Room
       </h1>
-      <div className="md:w-1/2 w-[90%] h-1/2 bg-zinc-500 rounded-xl bg-opacity-30 flex flex-col items-center ">
+      <div className="md:w-1/2 w-[90%] h-1/2 bg-zinc-500 rounded-xl bg-opacity-30 flex flex-col items-center">
         <div className="flex flex-col gap-3 justify-center items-center h-full">
           <button className="py-2 px-4 w-64 bg-blue-600 text-white rounded-lg">
             Create Room

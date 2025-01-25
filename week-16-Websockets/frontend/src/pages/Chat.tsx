@@ -1,5 +1,16 @@
-import React from 'react'
+import { useRef, useState } from "react";
+
 const Chat = () => {
+  const [messages, setMessages] = useState(["Hello From the System", "ok"]);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const sendMessage = () => {
+    const msg = inputRef.current?.value;
+    if (msg) {
+      setMessages([...messages, msg]);
+    }
+  };
+
   return (
     <div className="w-screen h-screen bg-slate-900 flex justify-center items-center flex-col">
       <h1
@@ -9,14 +20,31 @@ const Chat = () => {
       </h1>
       <div className="md:w-1/2 w-[90%] h-1/2 bg-zinc-500 rounded-xl bg-opacity-30 flex flex-col items-center py-3 ">
         <div className="flex flex-col gap-3 justify-start px-4">
-          <div className=' bg-white bg-opacity-80 py-2 px-3 w-fit rounded-xl max-w-[90%]'> message</div>
-          <div className=' bg-white bg-opacity-80 py-2 px-3 w-fit rounded-xl max-w-[90%]'> Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>
-          <div className=' bg-white bg-opacity-80 py-2 px-3 w-fit rounded-xl max-w-[90%]'> Lorem ipsum dolor sit, amet consectetur adipisicing elit. Optio saepe quod ducimus possimus recusandae hic nobis corrupti omnis accusantium, nemo obcaecati! Vero cumque dolores magni voluptates facere. Labore, ipsa cumque illum similique optio vitae doloribus? Iste, architecto? Exercitationem cupiditate voluptates atque suscipit non accusantium ut omnis, repellendus maxime ratione impedit delectus debitis enim facere alias eum aperiam quidem voluptatibus nemo nobis. Ipsam dignissimos hic quae dolorum. Repudiandae corrupti voluptatem sed sunt quod exercitationem earum ipsam perspiciatis ducimus vero. Ipsa ratione obcaecati vero possimus perferendis sunt accusamus fugit doloribus, at reiciendis modi. Aut temporibus ducimus ipsa, doloremque vero cumque expedita quisquam.</div>
-
+          {messages.map((message, index) => {
+            return (
+              <div
+                key={index}
+                className=" bg-white bg-opacity-80 py-2 px-3 w-fit rounded-xl max-w-[90%]">
+                {message}
+              </div>
+            );
+          })}
         </div>
       </div>
+      <div className="md:w-1/2 w-[90%] flex justify-between gap-1">
+        <input
+          ref={inputRef}
+          className="w-[90%] py-1 px-3 text-lg outline-none bg-zinc-600 text-white mt-2 rounded-md"
+          type="text"
+        />
+        <button
+          onClick={sendMessage}
+          className="w-fit flex-end bg-blue-500 py-2 mt-2 px-5 text-white font-semibold rounded-md">
+          Send
+        </button>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Chat
+export default Chat;
