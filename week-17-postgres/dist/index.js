@@ -19,16 +19,43 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.get("/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield prisma.users.findMany();
+        const users = yield prisma.users.findMany({
+            select: {
+                username: true,
+                email: true
+            }
+        });
         res.status(200).json({
             messsage: "success",
-            users
+            users,
         });
     }
     catch (error) {
         res.status(400).json({
             messsage: "error",
-            error
+            error,
+        });
+    }
+}));
+app.get("/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const users = yield prisma.users.findFirst({
+            where: { id: parseInt(id) },
+            select: {
+                username: true,
+                email: true
+            }
+        });
+        res.status(200).json({
+            messsage: "success",
+            users,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            messsage: "error",
+            error,
         });
     }
 }));
@@ -39,18 +66,18 @@ app.post("/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             data: {
                 username,
                 email,
-                password
-            }
+                password,
+            },
         });
         res.status(200).json({
             messsage: "success",
-            user
+            user,
         });
     }
     catch (error) {
         res.status(400).json({
             messsage: "error",
-            error
+            error,
         });
     }
 }));
