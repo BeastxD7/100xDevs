@@ -8,19 +8,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
 const client_1 = require("@prisma/client");
-const client = new client_1.PrismaClient();
-function query() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const users = yield client.user.create({
+const prisma = new client_1.PrismaClient();
+const app = (0, express_1.default)();
+app.use(express_1.default.json());
+app.get("/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const users = yield prisma.users.findMany();
+        res.status(200).json({
+            messsage: "success",
+            users
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            messsage: "error",
+            error
+        });
+    }
+}));
+app.post("/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { username, email, password } = req.body;
+        const user = yield prisma.users.create({
             data: {
-                username: "Beast",
-                email: "beast@beast.com",
-                password: "qwerty"
+                username,
+                email,
+                password
             }
         });
-        console.log(users);
-    });
-}
-query();
+        res.status(200).json({
+            messsage: "success",
+            user
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            messsage: "error",
+            error
+        });
+    }
+}));
+app.listen(3000, () => {
+    console.log(`server running`);
+});

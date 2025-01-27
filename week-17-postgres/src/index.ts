@@ -1,17 +1,52 @@
+import express from "express";
 import { PrismaClient } from "@prisma/client";
 
-const client = new PrismaClient();
+const prisma = new PrismaClient();
+
+const app = express();
+app.use(express.json());
 
 
-async function query() {
-  const users = await client.user.create({
-   data:{
-    username:"Beast",
-    email:"beast@beast.com",
-    password:"qwerty"
-   }
-  })  
-  console.log(users);
-}
+app.get("/users", async (req, res)=>{
 
-query()
+  try {
+  const users = await prisma.users.findMany()
+  res.status(200).json({
+    messsage:"success",
+    users
+  })
+  } catch (error) {
+    res.status(400).json({
+      messsage:"error",
+      error
+    })
+  }
+})
+
+
+app.post("/users", async (req, res)=>{
+
+  try {
+  const {username , email,password} = req.body;
+  const user = await prisma.users.create({
+    data:{
+      username,
+      email,
+      password
+    }
+  })
+  res.status(200).json({
+    messsage:"success",
+    user
+  })
+  } catch (error) {
+    res.status(400).json({
+      messsage:"error",
+      error
+    })
+  }
+})
+
+app.listen(3000, () => {
+  console.log(`server running`);
+})
