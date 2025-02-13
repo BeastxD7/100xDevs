@@ -1,65 +1,170 @@
 import express from "express";
+import { SignUpSchema ,SignInSchema, CreateRoomSchema } from '@repo/common/types';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
+import { prisma } from '@repo/db/prisma-client';
+import { JWT_SECRET } from "./config";
+import { middleware } from "./middleware";
+
+
 
 const app = express();
+app.use(express.json())
 
-app.post("/signup" , (req ,res) => {
+app.post("/signup" , async (req ,res) => {
     
     try {
-        //TODO:
-        //zod validation
-        const {username , email , password}  = req.body;
-        //check existing user in db
-        //hash the password using bcrypt
-        //if not then insert to db
+
+
+        const parsedData  = SignUpSchema.safeParse(req.body);
+
+        if(!parsedData.success){
+            res.status(402).json({
+                message:"Invalid format!"
+            })
+            return;
+        }
+
+        const {username , email , password} = parsedData.data;
+        const user = await prisma.user.findFirst({
+            where: {
+                email: email
+            }
+        })
+
+
+        if(user){
+            res.status(402).json({
+                message:" user with the email already exists!"
+            })
+            return;
+        }
+        const hashedPassword = await bcrypt.hash(password , 10)
+        
+        await prisma.user.create({
+            data:{
+                username:username,
+                email:email,
+                password:hashedPassword
+            }
+        })
+
         res.status(201).json({
             message:"User signed Up!"
         })
 
-    } catch (error) {
+    } catch (error:any) {
+
+        if(error.name == "PrismaClientKnownRequestError" && error.meta.target[0] == "username") {
+            res.status(400).json({
+                message:"username already exists! please try other username!",
+            })
+            return
+        }
+        
+        
         res.status(500).json({
-            message:"Something went wrong!"
+            message:"Something went wrong!",
+            error
         })
     }
-  
 })
 
-app.post("signin", (req,res) => {
+app.post("/signin", async (req,res) => {
     
    try {
     
-     //TODO:
-    //zod validation
-    const { email , password}  = req.body;
-    //check email exists if yes
-    //compare pass and store user in user variable, if true
-    //generate token using jwt, encode the userId
+    const parsedData  = SignInSchema.safeParse(req.body);
 
-    const token= 1;
+    
+    if(!parsedData.success) {
+        res.status(402).json({
+            message:"Invalid format!"
+        })
+        return;
+    }
+
+    const { email , password} = parsedData.data
+    const user = await prisma.user.findFirst({
+        where: {
+            email: email
+        }
+    })
+
+
+    if(!user){
+        res.status(402).json({
+            message:"user with the email doesn't exists!"
+        })
+        return;
+    }
+
+    const isMatched = await bcrypt.compare(password , user.password)
+
+    if(!isMatched){
+        res.status(402).json({
+            message:"invalid credentials"
+        })
+        return;
+    }
+
+    const token = jwt.sign({userId:user.id},JWT_SECRET ) 
+
 
     res.status(200).json({
+        message:"user signed in succesfully!",
         token
     })
 
    } catch (error) {
     res.status(500).json({
-        message:"Something went wrong!"
+        message:"Something went wrong!",
+        error
     })
 } 
 })
 
-app.post("/room" , (req ,res) => {
+app.post("/room",middleware , async(req ,res) => {
 
 
 try {
-    res.json({
-        roomId:123
+
+    const parsedData = CreateRoomSchema.safeParse(req.body);
+
+    if(!parsedData.success){
+        res.status(400).json({
+            message:"invalid input format"
+        })
+        return;
+    }
+
+    const {name} = parsedData.data
+    const userId = req.userId as unknown as string;
+
+    await prisma.room.create({
+        data:{
+            name:name,
+            adminId: userId
+        }
     })
-} catch (error) {
+
+    res.status(201).json({
+        name
+    })
+} catch (error:any) {
+
+    if(error.name == "PrismaClientKnownRequestError" && error.meta.modelName == "Room" && error.meta.target[0] == "name"){
+        res.status(409).json({
+            message:"Room name already exists! Please try with other name.",
+        })
+        return;
+    }
+
     res.status(500).json({
-        message:"Something went wrong!"
+        message:"Something went wrong!",
+        error
     })
 }
-
 })
 
 app.listen(3001)
