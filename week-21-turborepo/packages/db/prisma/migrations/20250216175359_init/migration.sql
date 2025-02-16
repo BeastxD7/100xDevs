@@ -23,7 +23,7 @@ CREATE TABLE "Room" (
 CREATE TABLE "Chat" (
     "id" SERIAL NOT NULL,
     "message" TEXT NOT NULL,
-    "roomid" INTEGER NOT NULL,
+    "roomName" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
 
     CONSTRAINT "Chat_pkey" PRIMARY KEY ("id")
@@ -42,7 +42,7 @@ CREATE UNIQUE INDEX "Room_name_key" ON "Room"("name");
 ALTER TABLE "Room" ADD CONSTRAINT "Room_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Chat" ADD CONSTRAINT "Chat_roomid_fkey" FOREIGN KEY ("roomid") REFERENCES "Room"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Chat" ADD CONSTRAINT "Chat_roomName_fkey" FOREIGN KEY ("roomName") REFERENCES "Room"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Chat" ADD CONSTRAINT "Chat_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
