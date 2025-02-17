@@ -5,11 +5,16 @@ import jwt from "jsonwebtoken"
 import { prisma } from '@repo/db/prisma-client';
 import { JWT_SECRET } from "./config";
 import { middleware } from "./middleware";
-
-
+import cors from "cors"
 
 const app = express();
 app.use(express.json())
+app.use(cors())
+
+const corsOptions = {
+    origin: '*', 
+    methods: ['GET', 'POST'],
+  };
 
 app.post("/signup" , async (req ,res) => {
     
@@ -165,6 +170,38 @@ try {
         error
     })
 }
+})
+
+app.get("/chats/:roomName", async (req ,res)=> {
+
+    try {
+        
+        const roomName = req.params.roomName
+
+    const messages = await prisma.chat.findMany({
+        where:{
+            roomName
+        },
+        take:50,
+        orderBy:{
+            id:"desc"
+        }
+        
+    })
+
+    res.status(200).json({
+        messages
+    })
+
+    } catch (error) {
+        console.error(error);
+        
+        res.status(500).json({
+            message:"Something went wrong!",
+            error
+        })
+    }
+
 })
 
 app.listen(3001)
