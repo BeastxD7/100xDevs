@@ -15,6 +15,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("WebSocket connection opened!");
       newSocket.send(JSON.stringify({ type: "join", payload: { roomId } }));
     };
+    
   
     newSocket.onmessage = (event) => {
       console.log("Message from server: ", event.data);
